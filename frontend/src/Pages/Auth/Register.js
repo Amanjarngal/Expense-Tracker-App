@@ -70,39 +70,67 @@ const Register = () => {
         </Typography>
 
         <form onSubmit={handleSubmit}>
-          <TextField 
-            label="Username" 
-            name="username" 
-            fullWidth 
-            margin="normal" 
-            onChange={handleChange} 
-            value={values.username} 
-          />
-          <TextField 
-            label="First Name" 
-            name="firstname" 
-            fullWidth 
-            margin="normal" 
-            onChange={handleChange} 
-            value={values.firstname} 
-          />
-          <TextField 
-            label="Last Name" 
-            name="lastname" 
-            fullWidth 
-            margin="normal" 
-            onChange={handleChange} 
-            value={values.lastname} 
-          />
-          <TextField 
-            label="Password" 
-            name="password" 
-            type="password" 
-            fullWidth 
-            margin="normal" 
-            onChange={handleChange} 
-            value={values.password} 
-          />
+        <TextField 
+  label="Username" 
+  name="username" 
+  fullWidth 
+  margin="normal" 
+  onChange={handleChange} 
+  value={values.username} 
+  InputProps={{
+    sx: { 
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "none" // Removes the border
+      }
+    }
+  }} 
+/>
+<TextField 
+  label="First Name" 
+  name="firstname" 
+  fullWidth 
+  margin="normal" 
+  onChange={handleChange} 
+  value={values.firstname} 
+  InputProps={{
+    sx: { 
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "none" // Removes the border
+      }
+    }
+  }} 
+/>
+<TextField 
+  label="Last Name" 
+  name="lastname" 
+  fullWidth 
+  margin="normal" 
+  onChange={handleChange} 
+  value={values.lastname} 
+  InputProps={{
+    sx: { 
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "none" // Removes the border
+      }
+    }
+  }} 
+/>
+<TextField 
+  label="Password" 
+  name="password" 
+  type="password" 
+  fullWidth 
+  margin="normal" 
+  onChange={handleChange} 
+  value={values.password} 
+  InputProps={{
+    sx: { 
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "none" // Removes the border
+      }
+    }
+  }} 
+/>
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>
             {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
           </Button>

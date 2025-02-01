@@ -57,8 +57,37 @@ const Login = () => {
         <Typography variant="h6" fontWeight="bold" color="text.secondary" gutterBottom>Login</Typography>
 
         <form onSubmit={handleSubmit}>
-          <TextField label="Username" name="username" fullWidth margin="normal" onChange={handleChange} value={values.username} />
-          <TextField label="Password" name="password" type="password" fullWidth margin="normal" onChange={handleChange} value={values.password} />
+          <TextField 
+            label="Username" 
+            name="username" 
+            fullWidth 
+            margin="normal" 
+            onChange={handleChange} 
+            value={values.username} 
+            InputProps={{
+              sx: { 
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "none" // Removes the border
+                }
+              }
+            }} 
+          />
+          <TextField 
+            label="Password" 
+            name="password" 
+            type="password" 
+            fullWidth 
+            margin="normal" 
+            onChange={handleChange} 
+            value={values.password} 
+            InputProps={{
+              sx: { 
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "none" // Removes the border
+                }
+              }
+            }} 
+          />
 
           <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>
             {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
@@ -75,3 +104,4 @@ const Login = () => {
 };
 
 export default Login;
+
