@@ -1,15 +1,19 @@
-import { useEffect, useState } from "react";
-import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
+import { useEffect, useState, useContext } from "react";
+import { 
+  Container, Card, TextField, Button, Typography, CircularProgress, IconButton 
+} from "@mui/material";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginAPI } from "../../utils/ApiRequest";
-import './Login.css'; // Import custom CSS
+import { ThemeContext } from "../../context/themeContext";
+import { DarkMode, LightMode } from "@mui/icons-material";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { mode, toggleTheme } = useContext(ThemeContext);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -31,7 +35,7 @@ const Login = () => {
     pauseOnHover: false,
     draggable: true,
     progress: undefined,
-    theme: "dark",
+    theme: mode, // Matches theme
   };
 
   const handleChange = (e) => {
@@ -47,86 +51,110 @@ const Login = () => {
       const { data } = await axios.post(loginAPI, { email, password });
       if (data.success) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/");
         toast.success(data.message, toastOptions);
+        navigate("/");
       } else {
         toast.error(data.message, toastOptions);
       }
     } catch (error) {
-      console.error("Error during login:", error);
-      toast.error("An error occurred. Please try again.", toastOptions);
+      toast.error("Login failed. Please try again.", toastOptions);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="lining-background">
-      <Container style={{ position: "relative", zIndex: 2 }}>
-        <Row className="justify-content-center">
-          <Col md={6}>
-            <Card className="login-card">
-              <Card.Body>
-                <h1 className="text-center">
-                  <AccountBalanceWalletIcon sx={{ fontSize: 40, color: "black" }} />
-                </h1>
-                <h2 className="text-dark text-center">Login</h2>
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="formBasicEmail" className="mt-3">
- <Form.Label className="text-dark">Email address</Form.Label>
-                    <Form.Control
-                      type="email"
-                      placeholder="Enter email"
-                      name="email"
-                      onChange={handleChange}
-                      value={values.email}
-                      className="inputStyle"
-                    />
-                  </Form.Group>
+    <Container 
+      maxWidth="sm" 
+      sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+    >
+      <Card 
+        sx={{ 
+          p: 4, 
+          width: "100%", 
+          maxWidth: 450, 
+          textAlign: "center", 
+          boxShadow: 3, 
+          borderRadius: 3,
+          bgcolor: mode === "dark" ? "background.paper" : "white",
+          color: mode === "dark" ? "text.primary" : "black"
+        }}
+      >
+        <IconButton 
+          onClick={toggleTheme} 
+          sx={{ position: "absolute", top: 16, right: 16 }}
+        >
+          {mode === "dark" ? <LightMode /> : <DarkMode />}
+        </IconButton>
 
-                  <Form.Group controlId="formBasicPassword" className="mt-3">
-                    <Form.Label className="text-dark">Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      placeholder="Password"
-                      onChange={handleChange}
-                      value={values.password}
-                      className="inputStyle"
-                    />
-                  </Form.Group>
+        <AccountBalanceWalletIcon sx={{ fontSize: 50, color: "primary.main", mb: 1 }} />
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          Welcome Back
+        </Typography>
+        <Typography variant="h6" fontWeight="bold" color="text.secondary" gutterBottom>
+          Login
+        </Typography>
 
-                  <div className="text-center mt-4">
-                    <Link to="/forgotPassword" className="text-dark lnk">
-                      Forgot Password?
-                    </Link>
-                  </div>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Email Address"
+            name="email"
+            type="email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={values.email}
+            onChange={handleChange}
+            sx={{
+              "& fieldset": { borderColor: mode === "dark" ? "#555" : "#ccc" },
+              "&:hover fieldset": { borderColor: mode === "dark" ? "#555" : "#ccc" },
+              "&.Mui-focused fieldset": { borderColor: mode === "dark" ? "#555" : "#ccc" },
+            }}
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={values.password}
+            onChange={handleChange}
+            sx={{
+              "& fieldset": { borderColor: mode === "dark" ? "#555" : "#ccc" },
+              "&:hover fieldset": { borderColor: mode === "dark" ? "#555" : "#ccc" },
+              "&.Mui-focused fieldset": { borderColor: mode === "dark" ? "#555" : "#ccc" },
+            }}
+          />
 
-                  <div className="text-center mt-3">
-                    <Button
-                      type="submit"
-                      className="btnStyle"
-                      disabled={loading}
-                    >
-                      {loading ? "Signing in…" : "Login"}
-                    </Button>
-                  </div>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 3, py: 1.5, fontSize: "1rem" }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
+          </Button>
+        </form>
 
-                  <p className="mt-3 text-center" style={{ color: "#9d9494" }}>
-                    Don't Have an Account?{" "}
-                    <Link to="/register" className="text-dark lnk">
-                      Register
-                    </Link>
-                  </p>
-                </Form>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-        <ToastContainer />
-      </Container>
-    </div>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          Don't have an account?{" "}
+          <Link to="/register" style={{ textDecoration: "none", color: "#1976d2", fontWeight: "bold" }}>
+            Register
+          </Link>
+        </Typography>
+
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          <Link to="/forgotPassword" style={{ textDecoration: "none", color: "#1976d2" }}>
+            Forgot Password?
+          </Link>
+        </Typography>
+      </Card>
+      <ToastContainer />
+    </Container>
   );
 };
 
-export default Login; 
+export default Login;
