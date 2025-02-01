@@ -20,12 +20,6 @@ const Register = () => {
     password: "",
   });
 
-  const toastOptions = {
-    position: "bottom-right",
-    autoClose: 2000,
-    theme: mode,
-  };
-
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
   };
@@ -34,17 +28,27 @@ const Register = () => {
     e.preventDefault();
     const { username, firstname, lastname, password } = values;
     setLoading(true);
-
+  
     try {
       const { data } = await axios.post(registerAPI, { username, firstname, lastname, password });
-      if (data.success) {
-        toast.success(data.message, toastOptions);
-        navigate("/login");
-      } else {
-        toast.error(data.message, toastOptions);
+  
+      if (data?.message) {  
+        toast.success(data.message || "Registration successful!", {
+          position: "bottom-right",
+          autoClose: 2000,
+          theme: mode,  // ✅ NO `type: "success"` needed
+        });
+  
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       }
     } catch (error) {
-      toast.error("Registration failed. Please try again.", toastOptions);
+      toast.error(error.response?.data?.message || "Something went wrong. Please try again.", {
+        position: "bottom-right",
+        autoClose: 2000,
+        theme: mode,
+      });
     } finally {
       setLoading(false);
     }
@@ -66,103 +70,43 @@ const Register = () => {
         </Typography>
 
         <form onSubmit={handleSubmit}>
-    <TextField 
-        label="Username" 
-        name="username" 
-        fullWidth 
-        margin="normal" 
-        onChange={handleChange} 
-        value={values.username} 
-        sx={{ 
-            "& .MuiOutlinedInput-root": {
-                borderRadius: 8,
-                border: 'none', // Remove the border
-                "& fieldset": {
-                    borderColor: 'transparent', // Set fieldset border color to transparent
-                },
-                "&:hover fieldset": {
-                    borderColor: 'transparent', // Keep hover border color transparent
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: 'transparent', // Keep focused border color transparent
-                },
-            },
-        }}
-    />
-    <TextField 
-        label="First Name" 
-        name="firstname" 
-        fullWidth 
-        margin="normal" 
-        onChange={handleChange} 
-        value={values.firstname} 
-        sx={{ 
-            "& .MuiOutlinedInput-root": {
-                borderRadius: 8,
-                border: 'none',
-                "& fieldset": {
-                    borderColor: 'transparent',
-                },
-                "&:hover fieldset": {
-                    borderColor: 'transparent',
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: 'transparent',
-                },
-            },
-        }}
-    />
-    <TextField 
-        label="Last Name" 
-        name="lastname" 
-        fullWidth 
-        margin="normal" 
-        onChange={handleChange} 
-        value={values.lastname} 
-        sx={{ 
-            "& .MuiOutlinedInput-root": {
-                borderRadius: 8,
-                border: 'none',
-                "& fieldset": {
-                    borderColor: 'transparent',
-                },
-                "&:hover fieldset": {
-                    borderColor: 'transparent',
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: 'transparent',
-                },
-            },
-        }}
-    />
-    <TextField 
-        label="Password" 
-        name="password" 
-        type="password" 
-        fullWidth 
-        margin="normal" 
-        onChange={handleChange} 
-        value={values.password} 
-        sx={{ 
-            "& .MuiOutlinedInput-root": {
-                borderRadius: 8,
-                border: 'none',
-                "& fieldset": {
-                    borderColor: 'transparent',
-                },
-                "&:hover fieldset": {
-                    borderColor: 'transparent',
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: 'transparent',
-                },
-            },
-        }}
-    />
-    <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>
-        {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
-    </Button>
-</form>
+          <TextField 
+            label="Username" 
+            name="username" 
+            fullWidth 
+            margin="normal" 
+            onChange={handleChange} 
+            value={values.username} 
+          />
+          <TextField 
+            label="First Name" 
+            name="firstname" 
+            fullWidth 
+            margin="normal" 
+            onChange={handleChange} 
+            value={values.firstname} 
+          />
+          <TextField 
+            label="Last Name" 
+            name="lastname" 
+            fullWidth 
+            margin="normal" 
+            onChange={handleChange} 
+            value={values.lastname} 
+          />
+          <TextField 
+            label="Password" 
+            name="password" 
+            type="password" 
+            fullWidth 
+            margin="normal" 
+            onChange={handleChange} 
+            value={values.password} 
+          />
+          <Button type="submit" variant="contained" fullWidth sx={{ mt: 3 }} disabled={loading}>
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
+          </Button>
+        </form>
 
         <Typography variant="body2" sx={{ mt: 2 }}>
           Already have an account? <Link to="/login">Login</Link>
