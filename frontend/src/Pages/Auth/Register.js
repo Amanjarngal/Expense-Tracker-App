@@ -161,12 +161,6 @@ const Register = () => {
             Login
           </Link>
         </Typography>
-
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          <Link to="/forgotPassword" style={{ textDecoration: "none", color: "#1976d2" }}>
-            Forgot Password?
-          </Link>
-        </Typography>
       </Card>
       <ToastContainer />
     </Container>
