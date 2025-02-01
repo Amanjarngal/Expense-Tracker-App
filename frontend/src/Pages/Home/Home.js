@@ -10,6 +10,12 @@ import {
   Box,
   Grid,
   Pagination,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  MenuItem,
 } from "@mui/material";
 import { DarkMode, LightMode, Delete, Edit, Logout } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
@@ -32,6 +38,22 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [chartData, setChartData] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [newExpense, setNewExpense] = useState({
+    amount: "",
+    category: "",
+    date: "",
+    description: "",
+  });
+  const [editExpense, setEditExpense] = useState({
+    amount: "",
+    category: "",
+    date: "",
+    description: "",
+    id: "",
+  });
+  const categories = ["Food", "Travel", "Entertainment", "Utilities", "Health", "Education", "Other"];
 
   useEffect(() => {
     fetchTransactions();
@@ -71,6 +93,92 @@ const Home = () => {
     }
   };
 
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setNewExpense({
+      amount: "",
+      category: "",
+      date: "",
+      description: "",
+    });
+  };
+
+  const handleOpenEditDialog = (expense) => {
+    setEditExpense({
+      ...expense,
+      date: expense.date.split("T")[0], // format date to match input type
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setOpenEditDialog(false);
+    setEditExpense({
+      amount: "",
+      category: "",
+      date: "",
+      description: "",
+      id: "",
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewExpense((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditExpense((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleCreateExpense = async () => {
+    if (!newExpense.amount || !newExpense.date || !newExpense.category) {
+      toast.error("Amount, Category, and Date are required.");
+      return;
+    }
+    
+    try {
+      await axios.post(`${API_URL}/expense/add`, newExpense, getAuthHeaders());
+      toast.success("Expense added successfully!");
+      fetchTransactions();
+      handleCloseDialog();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to add expense");
+    }
+  };
+
+  const handleEditExpense = async () => {
+    try {
+      await axios.put(`${API_URL}/expense/update/${editExpense.id}`, editExpense, getAuthHeaders());
+      toast.success("Expense updated successfully!");
+      fetchTransactions();
+      handleCloseEditDialog();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update expense");
+    }
+  };
+
+  const handleDeleteExpense = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/expense/delete/${id}`, getAuthHeaders());
+      toast.success("Expense deleted successfully!");
+      fetchTransactions();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete expense");
+    }
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = transactions.slice(indexOfFirstItem, indexOfLastItem);
@@ -92,11 +200,15 @@ const Home = () => {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="totalSpending" fill="#8884d8" />
+              <Bar dataKey="Total Spending" fill="#8884d8" />
             </BarChart>
           </Grid>
         </Grid>
       </Card>
+
+      <Box display="flex" justifyContent="space-between" mt={2}>
+        <Button variant="contained" onClick={handleOpenDialog}>New Expense</Button>
+      </Box>
 
       <Card>
         <Typography variant="h6">Recent Transactions</Typography>
@@ -108,6 +220,14 @@ const Home = () => {
               <Grid item xs={2}><Typography>₹{transaction.amount}</Typography></Grid>
               <Grid item xs={2}><Typography>{transaction.category}</Typography></Grid>
               <Grid item xs={3}><Typography>{new Date(transaction.date).toLocaleDateString()}</Typography></Grid>
+              <Grid item xs={2}>
+                <IconButton onClick={() => handleOpenEditDialog(transaction)}>
+                  <Edit />
+                </IconButton>
+                <IconButton onClick={() => handleDeleteExpense(transaction._id)}>
+                  <Delete />
+                </IconButton>
+              </Grid>
             </Grid>
           </Box>
         ))}
@@ -116,6 +236,122 @@ const Home = () => {
           <Pagination count={Math.ceil(transactions.length / itemsPerPage)} page={currentPage} onChange={(_, value) => setCurrentPage(value)} />
         </Box>
       </Card>
+
+      {/* Dialog for New Expense */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Add New Expense</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Amount"
+            type="number"
+            fullWidth
+            required
+            name="amount"
+            value={newExpense.amount}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+          <TextField
+            label="Category"
+            select
+            fullWidth
+            required
+            name="category"
+            value={newExpense.category}
+            onChange={handleInputChange}
+            margin="normal"
+          >
+            {categories.map((category) => (
+              <MenuItem key={category} value={category}>
+                {category}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Date"
+            type="date"
+            fullWidth
+            required
+            name="date"
+            value={newExpense.date}
+            onChange={handleInputChange}
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            name="description"
+            value={newExpense.description}
+            onChange={handleInputChange}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCreateExpense} color="primary">Create</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog for Edit Expense */}
+      <Dialog open={openEditDialog} onClose={handleCloseEditDialog}>
+        <DialogTitle>Edit Expense</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Amount"
+            type="number"
+            fullWidth
+            required
+            name="amount"
+            value={editExpense.amount}
+            onChange={handleEditInputChange}
+            margin="normal"
+          />
+          <TextField
+            label="Category"
+            select
+            fullWidth
+            required
+            name="category"
+            value={editExpense.category}
+            onChange={handleEditInputChange}
+            margin="normal"
+          >
+            {categories.map((category) => (
+              <MenuItem key={category} value={category}>
+                {category}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Date"
+            type="date"
+            fullWidth
+            required
+            name="date"
+            value={editExpense.date}
+            onChange={handleEditInputChange}
+            margin="normal"
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            label="Description"
+            fullWidth
+            name="description"
+            value={editExpense.description}
+            onChange={handleEditInputChange}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditDialog}>Cancel</Button>
+          <Button onClick={handleEditExpense} color="primary">Update</Button>
+        </DialogActions>
+      </Dialog>
 
       <ToastContainer />
     </Container>
